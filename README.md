@@ -29,11 +29,11 @@ harmonic-lab/
 python3 -m unittest tests/test_harmonic_engine.py
 ```
 
-### Run Frontend Locally
+### Run Local Development Server
 ```bash
-python3 -m http.server 3000 --directory public
+python3 dev_server.py
 ```
-Open `http://localhost:3000` in your browser.
+This serves the frontend at `http://localhost:3000` and dispatches `/api` requests to the Python serverless handler so both synthesis and MIDI downloads work locally.
 
 ## API Contracts
 
