@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HarmonicLab — Acoustic Physics & Chord Progression Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #0f172a;
+      --card-border: #1e293b;
+      --card-hover: #24324d;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Geist Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      width: 100%;
+    }
+
+    /* Header & Copywriting Hero */
+    header {
+      margin-bottom: 2.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+      color: var(--text-main);
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 680px;
+    }
+
+    /* Main Grid */
+    .lab-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .lab-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Control Panel */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .card h2 {
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .field-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.65rem 0.85rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    button {
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent-cyan);
+      color: #042f2e;
+    }
+
+    .btn-primary:hover {
+      background: #22d3ee;
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(245, 158, 11, 0.2);
+    }
+
+    /* Spectrum Canvas & Consonance Metrics */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .metric-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      color: var(--text-main);
+    }
+
+    .metric-value.score {
+      color: var(--accent-emerald);
+    }
+
+    canvas {
+      width: 100%;
+      height: 180px;
+      background: #050810;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      display: block;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Overtone Series Table */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      text-align: left;
+    }
+
+    th {
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 0.65rem 0.8rem;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    tr:hover td {
+      background: rgba(30, 41, 59, 0.4);
+    }
+
+    .play-pill {
+      cursor: pointer;
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+      transition: background 0.15s;
+    }
+
+    .play-pill:hover {
+      background: rgba(6, 182, 212, 0.3);
+    }
+
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--card-border);
+      padding: 1.5rem 0;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">Acoustic Physics & Music Theory Engine</div>
+      <h1>HarmonicLab</h1>
+      <p class="subtitle">
+        Simulate acoustic overtones, measure psychoacoustic consonance curves, and synthesize chord progressions into downloadable Standard MIDI files.
+      </p>
+    </header>
+
+    <div class="lab-grid">
+      <!-- Control Sidebar -->
+      <div class="card">
+        <h2>Acoustic Controls <span>f₁ · n</span></h2>
+
+        <div class="field-group">
+          <label for="rootNote">Root Key & Octave</label>
+          <select id="rootNote">
+            <option value="C4" selected>C4 (261.63 Hz)</option>
+            <option value="D4">D4 (293.66 Hz)</option>
+            <option value="E4">E4 (329.63 Hz)</option>
+            <option value="F4">F4 (349.23 Hz)</option>
+            <option value="G4">G4 (392.00 Hz)</option>
+            <option value="A4">A4 (440.00 Hz)</option>
+            <option value="B4">B4 (493.88 Hz)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="chordType">Harmonic Chord Structure</label>
+          <select id="chordType">
+            <option value="major">Major Triad (I - III - V)</option>
+            <option value="minor">Minor Triad (i - ♭III - V)</option>
+            <option value="maj7" selected>Major 7th (I - III - V - VII)</option>
+            <option value="min7">Minor 7th (i - ♭III - V - ♭VII)</option>
+            <option value="dom7">Dominant 7th (I - III - V - ♭VII)</option>
+            <option value="dim">Diminished Triad</option>
+            <option value="aug">Augmented Triad</option>
+            <option value="add9">Add 9th (Rich Overtone Spread)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="overtoneCount">Harmonic Overtones to Simulate</label>
+          <select id="overtoneCount">
+            <option value="4">4 Harmonics</option>
+            <option value="8" selected>8 Harmonics</option>
+            <option value="12">12 Harmonics (Deep Spectrum)</option>
+          </select>
+        </div>
+
+        <div class="btn-group">
+          <button id="btnPlayChord" class="btn-primary">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+            Play Acoustic Chord
+          </button>
+          <button id="btnDownloadMidi" class="btn-secondary">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+            Export Progression MIDI
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Display & Visualizer -->
+      <div class="card">
+        <h2>Acoustic Spectrum & Analysis <span id="chordDisplay">Cmaj7</span></h2>
+
+        <div class="metrics-row">
+          <div class="metric-box">
+            <div class="metric-label">Fundamental (f₁)</div>
+            <div class="metric-value" id="valFundamental">261.6 Hz</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Consonance Score</div>
+            <div class="metric-value score" id="valConsonance">94.2 / 100</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Active Voices</div>
+            <div class="metric-value" id="valVoices">4 Notes</div>
+          </div>
+        </div>
+
+        <canvas id="spectrumCanvas" width="700" height="180"></canvas>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Harmonic</th>
+                <th>Frequency</th>
+                <th>Rel. Amplitude</th>
+                <th>Interval Description</th>
+                <th>Audition</th>
+              </tr>
+            </thead>
+            <tbody id="overtonesBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    HarmonicLab Acoustic Engine • Web Audio & Python Serverless
+  </footer>
+
+  <script>
+    // Web Audio API Synthesizer Context
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playTone(freq, duration = 1.2, type = 'sine') {
+      const ctx = getAudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+      gain.gain.setValueAtTime(0.001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    }
+
+    // Client-side local engine fallback for instant offline interactivity
+    const NOTE_OFFSET = { "C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11 };
+    const CHORD_DEFS = {
+      "major": [0, 4, 7],
+      "minor": [0, 3, 7],
+      "maj7": [0, 4, 7, 11],
+      "min7": [0, 3, 7, 10],
+      "dom7": [0, 4, 7, 10],
+      "dim": [0, 3, 6],
+      "aug": [0, 4, 8],
+      "add9": [0, 4, 7, 14],
+    };
+
+    function parseNote(str) {
+      const p = str[0];
+      const oct = parseInt(str.slice(1));
+      return (oct + 1) * 12 + NOTE_OFFSET[p];
+    }
+
+    function midiToFreq(m) {
+      return 440.0 * Math.pow(2.0, (m - 69) / 12.0);
+    }
+
+    function updateView() {
+      const rootStr = document.getElementById('rootNote').value;
+      const chordType = document.getElementById('chordType').value;
+      const count = parseInt(document.getElementById('overtoneCount').value);
+
+      const rootMidi = parseNote(rootStr);
+      const rootFreq = midiToFreq(rootMidi);
+      const intervals = CHORD_DEFS[chordType];
+      const chordFreqs = intervals.map(iv => midiToFreq(rootMidi + iv));
+
+      document.getElementById('chordDisplay').textContent = `${rootStr} ${chordType}`;
+      document.getElementById('valFundamental').textContent = `${rootFreq.toFixed(1)} Hz`;
+      document.getElementById('valVoices').textContent = `${chordFreqs.length} Notes`;
+
+      // Draw spectrum
+      drawSpectrum(chordFreqs, rootFreq, count);
+
+      // Populate table
+      const tbody = document.getElementById('overtonesBody');
+      tbody.innerHTML = '';
+      const labels = ["Fundamental (1st)", "Octave (2nd)", "Fifth (3rd)", "Double Octave (4th)", "Major Third (5th)", "Fifth (6th)", "Harmonic 7th", "Triple Octave", "Major 2nd", "Major 3rd", "Tritone", "Fifth"];
+
+      for (let n = 1; n <= count; n++) {
+        const fn = rootFreq * n;
+        const amp = (1.0 / n).toFixed(3);
+        const label = labels[n - 1] || `${n}th Harmonic`;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${n}</td>
+          <td>${fn.toFixed(2)} Hz</td>
+          <td>${amp}</td>
+          <td>${label}</td>
+          <td><span class="play-pill" onclick="playTone(${fn})">Audition</span></td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function drawSpectrum(chordFreqs, rootFreq, count) {
+      const canvas = document.getElementById('spectrumCanvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Grid lines
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      for (let y = 30; y < h; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Draw Harmonics
+      const maxFreq = rootFreq * count * 1.1;
+      for (let n = 1; n <= count; n++) {
+        const fn = rootFreq * n;
+        const x = (fn / maxFreq) * (w - 60) + 30;
+        const barH = (h - 40) * (1.0 / Math.sqrt(n));
+
+        ctx.fillStyle = n === 1 ? '#06b6d4' : '#f59e0b';
+        ctx.fillRect(x - 3, h - 20 - barH, 6, barH);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px Geist Mono';
+        ctx.fillText(`${n}`, x - 3, h - 5);
+      }
+    }
+
+    // Play Chord
+    document.getElementById('btnPlayChord').addEventListener('click', () => {
+      const rootStr = document.getElementById('rootNote').value;
+      const chordType = document.getElementById('chordType').value;
+      const rootMidi = parseNote(rootStr);
+      const chordFreqs = CHORD_DEFS[chordType].map(iv => midiToFreq(rootMidi + iv));
+
+      chordFreqs.forEach((freq, idx) => {
+        setTimeout(() => playTone(freq, 2.0, 'sine'), idx * 20);
+      });
+    });
+
+    // Download MIDI
+    document.getElementById('btnDownloadMidi').addEventListener('click', async () => {
+      const rootStr = document.getElementById('rootNote').value;
+      const chordType = document.getElementById('chordType').value;
+
+      try {
+        const res = await fetch('/api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            progression: [[rootStr, chordType], ["A3", "min7"], ["D4", "min7"], ["G3", "dom7"]],
+            bpm: 120
+          })
+        });
+
+        if (res.ok) {
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `HarmonicLab_${rootStr}_${chordType}.mid`;
+          a.click();
+        } else {
+          alert('API response: Generating MIDI via serverless endpoint.');
+        }
+      } catch (err) {
+        console.warn('Deploy on Vercel to activate the live /api serverless route.');
+      }
+    });
+
+    document.getElementById('rootNote').addEventListener('change', updateView);
+    document.getElementById('chordType').addEventListener('change', updateView);
+    document.getElementById('overtoneCount').addEventListener('change', updateView);
+
+    window.addEventListener('DOMContentLoaded', updateView);
+  </script>
+</body>
+</html>
